@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/Login/Login";
-import Home from "../pages/Home/Home";
+import Login from "../pages/login/Login";
+import Home from "../pages/home/Home";
 import MainLayout from "../layouts/MainLayout";
-import DynamicPage from "../pages/Common/DynamicPage";
+import DynamicPage from "../pages/common/DynamicPage";
 import { getToken } from "../services/authService";
 
 const PrivateRoute = ({ children }) => {
