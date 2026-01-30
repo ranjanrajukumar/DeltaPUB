@@ -1,7 +1,7 @@
 
 export default function Topbar() {
   return (
-    <header className="h-16 bg-white border-b flex items-center justify-between px-6">
+    <header className="h-10 bg-white border-b flex items-center justify-between px-6">
       <div className="flex items-center gap-2 w-1/2">
         {/* <Search size={18} className="text-gray-400" /> */}
         <input

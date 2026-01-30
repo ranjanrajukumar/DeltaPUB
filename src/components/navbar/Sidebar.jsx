@@ -1,36 +1,34 @@
 // src/components/Sidebar.jsx
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";   // ✅ ADD THIS
-import axios from "axios";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import useMenus from "../common/useMenus";
 
 export default function Sidebar() {
-  const [menus, setMenus] = useState([]);
+  const menus = useMenus();
   const [openMenu, setOpenMenu] = useState(null);
-  const navigate = useNavigate();                 // ✅ ADD THIS
-
-  useEffect(() => {
-    loadMenus();
-  }, []);
-
-  const loadMenus = async () => {
-    try {
-      const res = await axios.get("https://localhost:7118/api/Menu");
-      setMenus(res.data);
-    } catch (err) {
-      console.error("Menu load error", err);
-    }
-  };
+  const [isExpanded, setIsExpanded] = useState(false); 
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMenu = (id) => {
     setOpenMenu(openMenu === id ? null : id);
   };
 
   return (
-    <aside className="w-64 bg-white border-r min-h-screen px-4 py-6">
-
+    <aside
+      onMouseEnter={() => setIsExpanded(true)}   
+      onMouseLeave={() => {
+        setIsExpanded(false);
+        setOpenMenu(null);
+      }}
+      className={`bg-[#111827] text-gray-300 min-h-screen px-2 py-6
+      transition-all duration-300 ease-in-out
+      ${isExpanded ? "w-52 px-4" : "w-16"} `}
+    >
       {/* Logo */}
-      <div className="text-xl font-bold text-indigo-600 mb-8 flex items-center gap-2">
-        ⚡ DeltaUI
+      <div className="text-xl font-bold text-white mb-10 flex items-center gap-2">
+        <span className="text-indigo-500">⬡</span>
+        {isExpanded && <span>zentory.ai</span>}
       </div>
 
       {/* Menu */}
@@ -39,32 +37,46 @@ export default function Sidebar() {
           .sort((a, b) => a.menuOrder - b.menuOrder)
           .map((menu) => (
             <div key={menu.menuID}>
-
               {/* Parent Menu */}
               <div
                 onClick={() => toggleMenu(menu.menuID)}
-                className="flex justify-between items-center px-4 py-2 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer"
+                className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer
+                hover:bg-gray-800 ${openMenu === menu.menuID ? "bg-gray-800 text-white" : ""
+                  }`}
               >
-                <span>{menu.menuTitle}</span>
+                <span className="flex items-center gap-3">
+                  📦
+                  {isExpanded && <span>{menu.menuTitle}</span>}
+                </span>
 
-                {menu.children.length > 0 && (
-                  <span className="text-sm">
+                {isExpanded && menu.children.length > 0 && (
+                  <span className="text-xs">
                     {openMenu === menu.menuID ? "▲" : "▼"}
                   </span>
                 )}
               </div>
 
               {/* Child Menu */}
-              {openMenu === menu.menuID &&
-                menu.children.map((child) => (
-                  <div
-                    key={child.menuID}
-                    onClick={() => navigate(child.menuUrl)}   // ✅ THIS IS THE FIX
-                    className="ml-6 mt-1 px-4 py-2 text-sm rounded-lg text-gray-500 hover:bg-indigo-100 hover:text-indigo-600 cursor-pointer"
-                  >
-                    {child.menuTitle}
-                  </div>
-                ))}
+              {isExpanded &&
+                openMenu === menu.menuID &&
+                menu.children.map((child) => {
+                  const isActive =
+                    location.pathname === child.menuUrl;
+
+                  return (
+                    <div
+                      key={child.menuID}
+                      onClick={() => navigate(child.menuUrl)}
+                      className={`ml-8 mt-1 px-3 py-2 text-sm rounded-md cursor-pointer
+                      border-l-2 ${isActive
+                          ? "bg-gray-800 text-white border-indigo-500"
+                          : "border-gray-700 hover:bg-gray-800 hover:text-white"
+                        }`}
+                    >
+                      {child.menuTitle}
+                    </div>
+                  );
+                })}
             </div>
           ))}
       </nav>
